@@ -56,7 +56,7 @@ const AuthController = {
         await redisClient.del(key);
         res.status(204).json('');
       } else {
-        res.status(401).end();
+        res.status(401).json({ error: 'Unauthorized' });
       }
     } catch (error) {
       res.status(401).json({ error: 'Unauthorized' });
