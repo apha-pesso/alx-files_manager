@@ -7,7 +7,7 @@ const AppController = {
   getStatus(req, res) {
     const redisStatus = redis.isAlive();
     const mongoStatus = mongo.isAlive();
-    res.status(200).json({ redis: redisStatus, mongo: mongoStatus });
+    res.status(200).json({ redis: redisStatus, db: mongoStatus });
   },
 
   async getStats(req, res) {
