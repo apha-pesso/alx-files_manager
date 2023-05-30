@@ -5,15 +5,15 @@ const mongo = require('../utils/db');
 
 const AppController = {
   getStatus(req, res) {
-    if (redis.isAlive && mongo.isAlive) {
-      res.status(200).send('{"redis": true, "db": true }');
-    }
+    const redisStatus = redis.isAlive();
+    const mongoStatus = mongo.isAlive();
+    res.status(200).json({ redis: redisStatus, mongo: mongoStatus });
   },
 
   async getStats(req, res) {
     const users = await mongo.nbUsers();
     const files = await mongo.nbFiles();
-    res.status(200).send(`{"users": ${users}, "files": ${files}}`);
+    res.status(200).json({ users, files });
   },
 };
 
