@@ -21,7 +21,7 @@ router.post('/users', UsersController.postNew);
 // some more routes for connection Authentication
 router.get('/connect', AuthController.getConnect);
 router.get('/disconnect', AuthController.getDisconnect);
-router.get('/users/me', AuthController.getMei);
+router.get('/users/me', AuthController.getMe);
 
 // Add routes for file
 router.post('/files', FilesController.postUpload);
