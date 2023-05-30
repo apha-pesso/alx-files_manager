@@ -75,7 +75,12 @@ const FilesController = {
           res
             .status(201)
             .json({
-              id: fileId, userId, name, type, isPublic, parentId,
+              id: fileId,
+              userId,
+              name,
+              type,
+              isPublic,
+              parentId,
             })
             .end();
         } catch (error) {
@@ -86,6 +91,66 @@ const FilesController = {
       }
     } else {
       res.status(401).json({ error: 'Unauthorized' });
+    }
+  },
+
+  // Getshow function endpoint
+  async getShow(req, res) {
+    const token = req.headers['x-token'];
+    const { id } = req.params;
+
+    console.log(id);
+
+    const key = `auth_${token}`;
+    const userId = await redistClient.get(key);
+    if (userId) {
+      const user = await mongo.getUserById(userId);
+      if (user) {
+        try {
+          const file = await mongo.getFileById(id);
+          if (!file) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else if (file.userId.toString() !== userId) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else {
+            res.status(200).json(file).end();
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        res.status(401).json({ error: 'Unauthorized' }).end();
+      }
+    } else {
+      res.status(401).json({ error: 'Unauthorized' }).end();
+    }
+  },
+
+  // Get index function endpoint with pagination
+  async getIndex(req, res) {
+    const token = req.headers['x-token'];
+    const { page } = req.query || 0;
+    const parentId = req.query.parentId || 0;
+    const key = `auth_${token}`;
+    const userId = await redistClient.get(key);
+    if (userId) {
+      const user = await mongo.getUserById(userId);
+      if (user) {
+        try {
+          const files = await mongo.getFilesByUserId(userId, page, parentId);
+          if (!files) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else {
+            res.status(200).json(files).end();
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        res.status(401).json({ error: 'Unauthorized' }).end();
+      }
+    } else {
+      res.status(401).json({ error: 'Unauthorized' }).end();
     }
   },
 };

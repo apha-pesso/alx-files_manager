@@ -149,6 +149,62 @@ class DBClient {
     return file;
   }
 
+  // Get files by userId and parentId with pagination using aggregate
+  async getFilesByUserId(userId, page, parentId) {
+    if (parentId === 0) {
+      if (page > 0) {
+        const files = await this.client
+          .db('files_manager')
+          .collection('files')
+          .aggregate([
+            { $match: { userId: ObjectId(userId) } },
+            { $skip: page * 20 },
+            { $limit: 20 },
+          ])
+          .toArray();
+        return files;
+      }
+      const files = await this.client
+        .db('files_manager')
+        .collection('files')
+        .aggregate([{ $match: { userId: ObjectId(userId) } }, { $limit: 20 }])
+        .toArray();
+      return files;
+    }
+    // Use aggregate to get the files
+    if (page > 0) {
+      const files = await this.client
+        .db('files_manager')
+        .collection('files')
+        .aggregate([
+          {
+            $match: { userId: ObjectId(userId), parentId: ObjectId(parentId) },
+          },
+          { $limit: 20 },
+        ])
+        .toArray();
+      return files;
+    }
+    const files = await this.client
+      .db('files_manager')
+      .collection('files')
+      .aggregate([
+        { $match: { userId: ObjectId(userId), parentId: ObjectId(parentId) } },
+        { $limit: 20 },
+      ])
+      .toArray();
+    return files;
+
+    // const files = await this.client
+    //   .db("files_manager")
+    //   .collection("files")
+    //   .find({ userId, parentId })
+    //   .skip(page * 20)
+    //   .limit(20)
+    //   .toArray();
+    // return files;
+  }
+
   // check user by ID
 
   /*
