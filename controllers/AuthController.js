@@ -12,12 +12,12 @@ function SHA1password(password) {
 }
 
 // Function to decode the authorization in header
-function b64Decode(token) {
-  const decoded = Buffer.from(token, 'base64').toString('utf-8');
-  const text = decoded.split(' ')[1];
-
-  return text;
-}
+// function b64Decode(token) {
+// const decoded = Buffer.from(token, 'base64').toString('utf-8');
+// const text = decoded.split(' ')[1];
+//
+// return text;
+// }
 
 const AuthController = {
   async getConnect(req, res) {
@@ -72,9 +72,9 @@ const AuthController = {
       if (userId) {
         const user = await mongo.getUserById(userId);
         if (user) {
-          const { id } = user;
+          // const { id } = user;
           const { email } = user;
-          res.status(200).json({ email, id });
+          res.status(200).json({ id: userId, email });
         }
       } else {
         res.status(401).json({ error: 'Unauthorized' });
