@@ -9,7 +9,7 @@ const FilesController = {
   async postUpload(req, res) {
     const token = req.headers['x-token'];
     const key = `auth_${token}`;
-    const userID = await redistClient.get(key);
+    const userId = await redistClient.get(key);
     const { name, type, data } = req.body;
     let { parentId, isPublic } = req.body;
 
@@ -20,9 +20,9 @@ const FilesController = {
     // const { isPublic } = req.body || false;
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
 
-    if (userID) {
+    if (userId) {
       // try{
-      const user = await mongo.getUserById(userID);
+      const user = await mongo.getUserById(userId);
       if (user) {
         try {
           if (!name) {
@@ -48,10 +48,10 @@ const FilesController = {
           if (parentId !== 0) {
             parentId = ObjectId(parentId);
           }
-          const userId = ObjectId(userID);
+          const userID = ObjectId(userId);
           // Add file to database
           const fileId = await mongo.addFile(
-            userId,
+            userID,
             name,
             type,
             isPublic,
@@ -75,7 +75,7 @@ const FilesController = {
           res
             .status(201)
             .json({
-              id: fileId, name, type, isPublic, parentId,
+              id: fileId, userId, name, type, isPublic, parentId,
             })
             .end();
         } catch (error) {
