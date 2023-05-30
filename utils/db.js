@@ -18,7 +18,6 @@ class DBClient {
     try {
       await this.client.connect();
       this.status = true;
-      console.log('Mongo Connected successfuly');
     } catch (error) {
       console.log('Error', error);
     }
