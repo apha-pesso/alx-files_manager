@@ -54,7 +54,7 @@ const AuthController = {
       const user = await mongo.getUserById(userId);
       if (user) {
         await redisClient.del(key);
-        res.status(204).json('');
+        res.status(204).end();
       } else {
         res.status(401).json({ error: 'Unauthorized' });
       }
