@@ -2,6 +2,7 @@
 const { v4: uuidV4 } = require('uuid');
 const { ObjectId } = require('mongodb');
 const fs = require('fs');
+const mime = require('mime-types');
 const mongo = require('../utils/db');
 const redistClient = require('../utils/redis');
 
@@ -213,6 +214,53 @@ const FilesController = {
       }
     } else {
       res.status(401).json({ error: 'Unauthorized' }).end();
+    }
+  },
+
+  // Get file data function endpoint
+  async getFile(req, res) {
+    const token = req.headers['x-token'];
+    const { id } = req.params;
+    const key = `auth_${token}`;
+    const userId = await redistClient.get(key);
+    const file = await mongo.getFileById(id);
+    if (file) {
+      if (userId && file.userId.toString() !== userId) {
+        res.status(404).json({ error: 'Not found' }).end();
+      }
+
+      if (file.isPublic === false) {
+        if (!userId || file.userId.toString() !== userId) {
+          res.status(404).json({ error: 'Not found' }).end();
+        }
+      }
+
+      // check that file is not a folder
+      if (file.type === 'folder') {
+        res.status(400).json({ error: "A folder doesn't have content" }).end();
+      }
+
+      // raise error if file does not exist locally
+      if (!fs.existsSync(file.absPath)) {
+        res.status(404).json({ error: 'Not found' }).end();
+      }
+
+      // check the type of file from the name using mime-types
+      const fileType = mime.lookup(file.name);
+
+      // read file and send it back
+      try {
+        const data = fs.readFileSync(file.absPath, 'utf-8');
+        if (userId === file.userId.toString()) {
+          res.setHeader('Content-Type', fileType);
+          res.status(200).json(data).end();
+        }
+        res.status(200).json(data).end();
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      res.status(404).json({ error: 'Not found' }).end();
     }
   },
 };
