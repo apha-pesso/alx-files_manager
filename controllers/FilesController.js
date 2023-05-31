@@ -99,7 +99,7 @@ const FilesController = {
     const token = req.headers['x-token'];
     const { id } = req.params;
 
-    console.log(id);
+    // console.log(id);
 
     const key = `auth_${token}`;
     const userId = await redistClient.get(key);
@@ -148,6 +148,68 @@ const FilesController = {
         }
       } else {
         res.status(401).json({ error: 'Unauthorized' }).end();
+      }
+    } else {
+      res.status(401).json({ error: 'Unauthorized' }).end();
+    }
+  },
+
+  // Put publish function endpoint
+  async putPublish(req, res) {
+    const token = req.headers['x-token'];
+    const { id } = req.params;
+    const key = `auth_${token}`;
+    const userId = await redistClient.get(key);
+    if (userId) {
+      const user = await mongo.getUserById(userId);
+      if (user) {
+        try {
+          const file = await mongo.getFileById(id);
+          if (!file) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else if (file.userId.toString() !== userId) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else {
+            // const isPublic =
+            await mongo.publishFile(id);
+            // console.log(isPublic);
+            const updatedFile = await mongo.getFileById(id);
+            res.status(200).json(updatedFile).end();
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    } else {
+      res.status(401).json({ error: 'Unauthorized' }).end();
+    }
+  },
+
+  // Put unpublish function endpoint
+  async putUnpublish(req, res) {
+    const token = req.headers['x-token'];
+    const { id } = req.params;
+    const key = `auth_${token}`;
+    const userId = await redistClient.get(key);
+    if (userId) {
+      const user = await mongo.getUserById(userId);
+      if (user) {
+        try {
+          const file = await mongo.getFileById(id);
+          if (!file) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else if (file.userId.toString() !== userId) {
+            res.status(404).json({ error: 'Not found' }).end();
+          } else {
+            // const isNotPublic =
+            await mongo.unPublishFile(id);
+            // console.log(isNotPublic);
+            const updatedFile = await mongo.getFileById(id);
+            res.status(200).json(updatedFile).end();
+          }
+        } catch (error) {
+          console.error(error);
+        }
       }
     } else {
       res.status(401).json({ error: 'Unauthorized' }).end();

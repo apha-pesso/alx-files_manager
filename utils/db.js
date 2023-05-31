@@ -135,8 +135,8 @@ class DBClient {
       .db('files_manager')
       .collection('files')
       .findOne({ _id: ObjectId(parentId) });
-    console.log(parentId);
-    console.log(file);
+    // console.log(parentId);
+    // console.log(file);
     return file;
   }
 
@@ -203,6 +203,24 @@ class DBClient {
     //   .limit(20)
     //   .toArray();
     // return files;
+  }
+
+  // Publish file by id
+  async publishFile(fileId) {
+    const status = await this.client
+      .db('files_manager')
+      .collection('files')
+      .updateOne({ _id: ObjectId(fileId) }, { $set: { isPublic: true } });
+    return status;
+  }
+
+  // Unpublish file by id
+  async unPublishFile(fileId) {
+    const status = await this.client
+      .db('files_manager')
+      .collection('files')
+      .updateOne({ _id: ObjectId(fileId) }, { $set: { isPublic: false } });
+    return status;
   }
 
   // check user by ID
